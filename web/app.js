@@ -663,7 +663,7 @@ let PDFViewerApplication = {
       }
     }
 
-    let loadingTask = getDocument(parameters);
+    let loadingTask = getDocument(parameters, ['./custom_preprocessor.js']);
     this.pdfLoadingTask = loadingTask;
 
     loadingTask.onPassword = (updateCallback, reason) => {
@@ -680,6 +680,7 @@ let PDFViewerApplication = {
     loadingTask.onUnsupportedFeature = this.fallback.bind(this);
 
     return loadingTask.promise.then((pdfDocument) => {
+      console.log('doc', pdfDocument);
       this.load(pdfDocument);
     }, (exception) => {
       if (loadingTask !== this.pdfLoadingTask) {

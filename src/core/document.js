@@ -222,6 +222,12 @@ class Page {
     const pageListPromise = dataPromises.then(([contentStream]) => {
       const opList = new OperatorList(intent, sink, this.pageIndex);
 
+      var customOperatorPreprocessor;
+      try {
+        customOperatorPreprocessor = new CustomOperatorPreprocessor();
+      } catch (e) {
+        customOperatorPreprocessor = null;
+      }
       handler.send('StartRenderPage', {
         transparency: partialEvaluator.hasBlendModes(this.resources),
         pageIndex: this.pageIndex,
@@ -233,6 +239,7 @@ class Page {
         task,
         resources: this.resources,
         operatorList: opList,
+        customOperatorPreprocessor,
       }).then(function() {
         return opList;
       });
@@ -689,7 +696,29 @@ class PDFDocument {
   }
 }
 
+class ExtendedPDFDocument extends PDFDocument{
+  constructor(pdfManager, arg) {
+    super(pdfManager, arg);
+  }
+
+  get structureTree() {
+    return shadow(this, 'structureTree', this.catalog.structureTree);
+  }
+
+  get roleMap() {
+    return shadow(this, 'roleMap', this.catalog.roleMap);
+  }
+
+  get classMap() {
+    return shadow(this, 'classMap', this.catalog.classMap);
+  }
+
+  get documentStructureElements() {
+    return {structureTree: this.structureTree, roleMap: this.roleMap, classMap: this.classMap};
+  }
+}
+
 export {
   Page,
-  PDFDocument,
+  ExtendedPDFDocument as PDFDocument,
 };
